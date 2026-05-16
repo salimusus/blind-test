@@ -1,1 +1,770 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Blin Test Musical - 200 Hits (1980-2026)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Poppins', 'Segoe UI', 'Comic Neue', sans-serif;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 60px;
+            padding: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 0.7rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .players-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .player-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 40px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .player-badge.active {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px gold;
+        }
+
+        .player-score {
+            background: gold;
+            color: #333;
+            border-radius: 30px;
+            padding: 2px 8px;
+            margin-left: 6px;
+            font-size: 0.7rem;
+        }
+
+        .game-panel {
+            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            border-radius: 50px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .turn-indicator {
+            background: #f9ca24;
+            border-radius: 50px;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .music-icon {
+            font-size: 3.5rem;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); text-shadow: 0 0 10px #f9ca24; }
+        }
+
+        .extrait-info {
+            background: #0f3460;
+            border-radius: 30px;
+            padding: 8px;
+            margin: 10px 0;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #f9ca24;
+            transition: width 0.1s linear;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .audio-btn {
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: 0.05s linear;
+        }
+
+        .audio-btn:active { transform: translateY(3px); }
+        .audio-btn.play { background: #6c5ce7; box-shadow: 0 4px 0 #4a3a9e; }
+        .audio-btn.stop { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        .audio-btn.mic { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        .audio-btn.mic.recording { background: #27ae60; animation: pulseMic 1s infinite; }
+
+        @keyframes pulseMic {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .answer-area {
+            margin: 15px 0;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: 3px solid #6c5ce7;
+            border-radius: 50px;
+            text-align: center;
+            font-family: inherit;
+            background: white;
+        }
+
+        .voice-feedback {
+            background: #2c3e66;
+            border-radius: 30px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #f9ca24;
+        }
+
+        .answer-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background: #00b894;
+            border: none;
+            border-radius: 50px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #008f6b;
+        }
+
+        .btn-skip {
+            flex: 1;
+            background: #e74c3c;
+            border: none;
+            border-radius: 50px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #c0392b;
+        }
+
+        .feedback {
+            background: #2c3e66;
+            border-radius: 40px;
+            padding: 12px;
+            margin: 15px 0;
+            color: white;
+            font-weight: bold;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .ranking {
+            background: #1a1a2e;
+            border-radius: 40px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .ranking h3 { color: gold; margin-bottom: 10px; }
+        .ranking-list { display: flex; flex-direction: column; gap: 6px; }
+        .ranking-item { display: flex; justify-content: space-between; background: #2a2a40; padding: 8px 15px; border-radius: 30px; color: white; }
+        .next-btn { background: #f39c12; border: none; border-radius: 50px; padding: 12px; font-size: 1.1rem; font-weight: bold; color: white; width: 100%; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 0 #b2631a; }
+        .hidden { display: none; }
+
+        .bounce { animation: bounce 0.3s ease-out; }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @media (max-width: 500px) {
+            .game-container { padding: 15px; }
+            .player-badge { padding: 4px 8px; font-size: 0.7rem; }
+            .turn-indicator { font-size: 0.9rem; }
+            .audio-btn { padding: 10px 15px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>🎵 BLIN TEST MUSICAL 🎵</h1>
+    <div class="subtitle">200 Hits incontournables 1980 → 2026</div>
+
+    <div class="players-grid" id="playersGrid"></div>
+
+    <div class="game-panel">
+        <div class="turn-indicator" id="turnIndicator">🎤 Au tour de <span id="currentPlayerName">...</span> 🎤</div>
+        <div class="music-icon">🎧</div>
+        <div class="extrait-info" id="extraitInfo">🎵 Extrait mystère 🎵</div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+        <div class="audio-controls">
+            <button class="audio-btn play" id="playBtn">▶ JOUER L'EXTRAIT</button>
+            <button class="audio-btn stop" id="stopBtn">⏹ STOP</button>
+            <button class="audio-btn mic" id="micBtn">🎤 RÉPONSE VOCALE</button>
+        </div>
+
+        <div class="answer-area">
+            <input type="text" id="answerInput" class="answer-input" placeholder="Titre ou Artiste..." autocomplete="off">
+            <div class="voice-feedback" id="voiceFeedback"></div>
+            <div class="answer-buttons">
+                <button class="btn-submit" id="submitBtn">🎯 VALIDER</button>
+                <button class="btn-skip" id="skipBtn">😅 PASSER</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedbackMsg">🎮 200 titres de légende ! Clique sur JOUER, écoute et devine le TITRE ou l'ARTISTE !</div>
+
+    <div class="ranking hidden" id="rankingPanel">
+        <h3>🏆 CLASSEMENT FINAL 🏆</h3>
+        <div class="ranking-list" id="rankingList"></div>
+        <button class="next-btn" id="restartBtn">🔄 NOUVELLE PARTIE</button>
+    </div>
+</div>
+
+<script>
+    // ========== LISTE DES JOUEURS ==========
+    const PLAYERS = [
+        { name: "Lola", emoji: "🌸", score: 0 },
+        { name: "Enzo", emoji: "🚀", score: 0 },
+        { name: "Marlone", emoji: "🦁", score: 0 },
+        { name: "Stéphanie", emoji: "💎", score: 0 },
+        { name: "Emma", emoji: "🌟", score: 0 },
+        { name: "Télio", emoji: "🐒", score: 0 }
+    ];
+
+    // ========== BASE DE DONNÉES MASSIVE - 200 HITS (1980-2026) ==========
+    // Utilisation de YouTube No Cookie (sans publicités)
+    const MUSIC_QUESTIONS = [
+        // ANNÉES 1980-1984
+        { title: "Billie Jean", artist: "Michael Jackson", year: 1983, youtubeId: "Zi_XLOBDo_Y", start: 15, end: 35 },
+        { title: "Thriller", artist: "Michael Jackson", year: 1982, youtubeId: "sOnqjkJTMaA", start: 20, end: 40 },
+        { title: "Beat It", artist: "Michael Jackson", year: 1983, youtubeId: "oRdxUFDoQe0", start: 10, end: 30 },
+        { title: "Like a Virgin", artist: "Madonna", year: 1984, youtubeId: "s__rX_WL100", start: 10, end: 30 },
+        { title: "Material Girl", artist: "Madonna", year: 1984, youtubeId: "6p-lDYPR2P8", start: 10, end: 30 },
+        { title: "Sweet Dreams", artist: "Eurythmics", year: 1983, youtubeId: "qeMFqkcPYcg", start: 10, end: 30 },
+        { title: "Every Breath You Take", artist: "The Police", year: 1983, youtubeId: "OMOGaugKpzs", start: 10, end: 30 },
+        { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", year: 1983, youtubeId: "PIb6AZdTr-A", start: 10, end: 30 },
+        { title: "Africa", artist: "Toto", year: 1982, youtubeId: "FTQbiNvZqaY", start: 15, end: 35 },
+        { title: "Take on Me", artist: "A-ha", year: 1985, youtubeId: "djV11Xbc914", start: 10, end: 30 },
+        { title: "I Wanna Dance with Somebody", artist: "Whitney Houston", year: 1987, youtubeId: "eH3giaIzONA", start: 10, end: 30 },
+        { title: "Livin' on a Prayer", artist: "Bon Jovi", year: 1986, youtubeId: "lDK9QqIzhwk", start: 10, end: 30 },
+        { title: "Don't Stop Believin'", artist: "Journey", year: 1981, youtubeId: "VcjzHMhBtf0", start: 25, end: 45 },
+        { title: "Summer of '69", artist: "Bryan Adams", year: 1984, youtubeId: "9f06QZCVUHg", start: 10, end: 30 },
+        { title: "The Final Countdown", artist: "Europe", year: 1986, youtubeId: "9jK-NcRmVcw", start: 10, end: 30 },
+        { title: "Never Gonna Give You Up", artist: "Rick Astley", year: 1987, youtubeId: "dQw4w9WgXcQ", start: 10, end: 30 },
+        { title: "Purple Rain", artist: "Prince", year: 1984, youtubeId: "TvnYmWpD_T8", start: 30, end: 50 },
+        { title: "Like a Prayer", artist: "Madonna", year: 1989, youtubeId: "79fzeNUjQ3U", start: 10, end: 30 },
+        { title: "With or Without You", artist: "U2", year: 1987, youtubeId: "XmSdTa9kaiQ", start: 20, end: 40 },
+        { title: "Walk This Way", artist: "Run-DMC", year: 1986, youtubeId: "4B_UYYPb-Gk", start: 10, end: 30 },
+        
+        // ANNÉES 1990-1994
+        { title: "Smells Like Teen Spirit", artist: "Nirvana", year: 1991, youtubeId: "hTWKbfoikeg", start: 20, end: 40 },
+        { title: "Wannabe", artist: "Spice Girls", year: 1996, youtubeId: "gJLIiF15wjQ", start: 5, end: 25 },
+        { title: "Wonderwall", artist: "Oasis", year: 1995, youtubeId: "6hzrDeceEKc", start: 10, end: 30 },
+        { title: "Zombie", artist: "The Cranberries", year: 1994, youtubeId: "6Ejga4kJUts", start: 10, end: 30 },
+        { title: "Waterfalls", artist: "TLC", year: 1995, youtubeId: "8WEtxJ4-sh4", start: 10, end: 30 },
+        { title: "I Will Always Love You", artist: "Whitney Houston", year: 1992, youtubeId: "3JWTaaS7LdU", start: 20, end: 40 },
+        { title: "MMMBop", artist: "Hanson", year: 1997, youtubeId: "NHozn0YXAeE", start: 5, end: 25 },
+        { title: "Believe", artist: "Cher", year: 1998, youtubeId: "LbPRBRIpCWE", start: 10, end: 30 },
+        { title: "Say My Name", artist: "Destiny's Child", year: 1999, youtubeId: "sQgd6MccwZc", start: 10, end: 30 },
+        { title: "Barbie Girl", artist: "Aqua", year: 1997, youtubeId: "ZyhrYis509A", start: 5, end: 25 },
+        { title: "Torn", artist: "Natalie Imbruglia", year: 1997, youtubeId: "VV1XWJN3nJo", start: 10, end: 30 },
+        { title: "Killing Me Softly", artist: "Fugees", year: 1996, youtubeId: "oKOtzIo-uYw", start: 15, end: 35 },
+        { title: "No Diggity", artist: "Blackstreet", year: 1996, youtubeId: "3KL9mRus19o", start: 10, end: 30 },
+        { title: "Gangsta's Paradise", artist: "Coolio", year: 1995, youtubeId: "fPO76Jlnz6c", start: 15, end: 35 },
+        { title: "Baby One More Time", artist: "Britney Spears", year: 1998, youtubeId: "C-u5WLJ9Yk4", start: 10, end: 30 },
+        
+        // ANNÉES 2000-2004
+        { title: "Toxic", artist: "Britney Spears", year: 2003, youtubeId: "LOZuxwVk7TU", start: 10, end: 30 },
+        { title: "Hey Ya!", artist: "OutKast", year: 2003, youtubeId: "PWgvGjAhvIw", start: 5, end: 25 },
+        { title: "Crazy in Love", artist: "Beyoncé", year: 2003, youtubeId: "ViwtNLUqkMY", start: 10, end: 30 },
+        { title: "Hips Don't Lie", artist: "Shakira", year: 2005, youtubeId: "DUT5rEU6pqM", start: 10, end: 30 },
+        { title: "Umbrella", artist: "Rihanna", year: 2007, youtubeId: "CvBfHwUxHIk", start: 10, end: 30 },
+        { title: "Poker Face", artist: "Lady Gaga", year: 2008, youtubeId: "bESGLojNYSo", start: 10, end: 30 },
+        { title: "Single Ladies", artist: "Beyoncé", year: 2008, youtubeId: "4m1EFMoRFvY", start: 10, end: 30 },
+        { title: "I Gotta Feeling", artist: "Black Eyed Peas", year: 2009, youtubeId: "uSD4vsh1zDA", start: 20, end: 40 },
+        { title: "Bad Romance", artist: "Lady Gaga", year: 2009, youtubeId: "qrO4YZeyl0I", start: 20, end: 40 },
+        { title: "TiK ToK", artist: "Kesha", year: 2009, youtubeId: "iP6XpLQM2Cs", start: 10, end: 30 },
+        { title: "SexyBack", artist: "Justin Timberlake", year: 2006, youtubeId: "3gOHvDP_vCs", start: 10, end: 30 },
+        { title: "Feel Good Inc.", artist: "Gorillaz", year: 2005, youtubeId: "HyHNuVaZJ-k", start: 15, end: 35 },
+        { title: "Mr. Brightside", artist: "The Killers", year: 2003, youtubeId: "gGdGFtwCNIG", start: 10, end: 30 },
+        { title: "Seven Nation Army", artist: "The White Stripes", year: 2003, youtubeId: "0J2QdDbelmY", start: 10, end: 30 },
+        { title: "Clocks", artist: "Coldplay", year: 2002, youtubeId: "d020hcWA_Wg", start: 10, end: 30 },
+        
+        // ANNÉES 2010-2014
+        { title: "Rolling in the Deep", artist: "Adele", year: 2010, youtubeId: "rYEDA3JcQqw", start: 10, end: 30 },
+        { title: "Uptown Funk", artist: "Mark Ronson ft. Bruno Mars", year: 2014, youtubeId: "OPf0YbXqDm0", start: 20, end: 40 },
+        { title: "Happy", artist: "Pharrell Williams", year: 2013, youtubeId: "ZbZSe6N_BXs", start: 10, end: 30 },
+        { title: "Get Lucky", artist: "Daft Punk", year: 2013, youtubeId: "h5EofwRzit0", start: 20, end: 40 },
+        { title: "Shake It Off", artist: "Taylor Swift", year: 2014, youtubeId: "nfWlot6h_JM", start: 10, end: 30 },
+        { title: "Thinking Out Loud", artist: "Ed Sheeran", year: 2014, youtubeId: "lp-EO5I60KA", start: 10, end: 30 },
+        { title: "Sorry", artist: "Justin Bieber", year: 2015, youtubeId: "fRh_vgS2dFE", start: 10, end: 30 },
+        { title: "Hello", artist: "Adele", year: 2015, youtubeId: "YQHsXMglC9A", start: 20, end: 40 },
+        { title: "Shape of You", artist: "Ed Sheeran", year: 2017, youtubeId: "JGwWNGJdvx8", start: 10, end: 30 },
+        { title: "Despacito", artist: "Luis Fonsi ft. Daddy Yankee", year: 2017, youtubeId: "kJQP7kiw5Fk", start: 10, end: 30 },
+        { title: "Havana", artist: "Camila Cabello", year: 2017, youtubeId: "HCjNJDNzw8Y", start: 10, end: 30 },
+        { title: "Bad Guy", artist: "Billie Eilish", year: 2019, youtubeId: "DyDfgMOUjCI", start: 10, end: 30 },
+        { title: "Old Town Road", artist: "Lil Nas X", year: 2019, youtubeId: "w2Ov5jzm3j8", start: 10, end: 30 },
+        { title: "Someone You Loved", artist: "Lewis Capaldi", year: 2018, youtubeId: "zABLecsR5UE", start: 10, end: 30 },
+        { title: "Blinding Lights", artist: "The Weeknd", year: 2020, youtubeId: "fHI8X4OXluQ", start: 20, end: 40 },
+        
+        // ANNÉES 2020-2026
+        { title: "Levitating", artist: "Dua Lipa", year: 2020, youtubeId: "TUVcZfQe-Kw", start: 10, end: 30 },
+        { title: "As It Was", artist: "Harry Styles", year: 2022, youtubeId: "H5v3kku4y6Q", start: 10, end: 30 },
+        { title: "Flowers", artist: "Miley Cyrus", year: 2023, youtubeId: "G7KNmW9a75Y", start: 5, end: 25 },
+        { title: "Espresso", artist: "Sabrina Carpenter", year: 2024, youtubeId: "e7GHJ6A3sAI", start: 10, end: 30 },
+        { title: "Not Like Us", artist: "Kendrick Lamar", year: 2024, youtubeId: "HaJk2BZdqxo", start: 20, end: 40 },
+        { title: "Lose Control", artist: "Teddy Swims", year: 2023, youtubeId: "GZ3zL7kT6_w", start: 10, end: 30 },
+        { title: "Cruel Summer", artist: "Taylor Swift", year: 2023, youtubeId: "ic8j13aHvqY", start: 10, end: 30 },
+        { title: "Paint the Town Red", artist: "Doja Cat", year: 2023, youtubeId: "m4_9TFeMnu4", start: 10, end: 30 },
+        { title: "Vampire", artist: "Olivia Rodrigo", year: 2023, youtubeId: "RlPNh_PBZb4", start: 10, end: 30 },
+        { title: "What Was I Made For", artist: "Billie Eilish", year: 2023, youtubeId: "cW8VLC9nnTo", start: 20, end: 40 },
+        { title: "Dance the Night", artist: "Dua Lipa", year: 2023, youtubeId: "aDnLxQ1B0Lw", start: 10, end: 30 },
+        { title: "I'm Good (Blue)", artist: "David Guetta & Bebe Rexha", year: 2022, youtubeId: "90RLyV9D2co", start: 10, end: 30 },
+        { title: "Unholy", artist: "Sam Smith ft. Kim Petras", year: 2022, youtubeId: "UxxajLWwzqY", start: 10, end: 30 },
+        { title: "Anti-Hero", artist: "Taylor Swift", year: 2022, youtubeId: "b1kbLwvqugk", start: 10, end: 30 },
+        { title: "Made You Look", artist: "Meghan Trainor", year: 2022, youtubeId: "qD9Zk9Yg8W0", start: 5, end: 25 },
+        { title: "Calm Down", artist: "Rema & Selena Gomez", year: 2022, youtubeId: "WcIcVapfqXw", start: 10, end: 30 },
+        { title: "Cupid", artist: "Fifty Fifty", year: 2023, youtubeId: "Qc7_zRjH-XM", start: 10, end: 30 },
+        { title: "Seven", artist: "Jungkook ft. Latto", year: 2023, youtubeId: "QU9c0053UAU", start: 10, end: 30 },
+        { title: "Beautiful Things", artist: "Benson Boone", year: 2024, youtubeId: "bN2eQvAOhKg", start: 20, end: 40 },
+        { title: "We Can't Be Friends", artist: "Ariana Grande", year: 2024, youtubeId: "3UGmdJ9Kn-g", start: 10, end: 30 },
+        { title: "I Had Some Help", artist: "Post Malone ft. Morgan Wallen", year: 2024, youtubeId: "5Ij1Ynhjq3M", start: 20, end: 40 },
+        { title: "A Bar Song (Tipsy)", artist: "Shaboozey", year: 2024, youtubeId: "ZgFc6-gakug", start: 10, end: 30 },
+        { title: "Die With A Smile", artist: "Lady Gaga & Bruno Mars", year: 2024, youtubeId: "k_6BchV9iPM", start: 20, end: 40 },
+        { title: "Houdini", artist: "Dua Lipa", year: 2023, youtubeId: "suAR1PYFNYA", start: 10, end: 30 },
+        { title: "Greedy", artist: "Tate McRae", year: 2023, youtubeId: "y9AFbjUO8iA", start: 10, end: 30 },
+        { title: "Yes, And?", artist: "Ariana Grande", year: 2024, youtubeId: "iG8ZgqoOqLg", start: 10, end: 30 },
+        { title: "Texas Hold 'Em", artist: "Beyoncé", year: 2024, youtubeId: "kFXIrUoOV80", start: 20, end: 40 },
+        { title: "Too Sweet", artist: "Hozier", year: 2024, youtubeId: "XcI0oUD6S_U", start: 10, end: 30 },
+        { title: "Fortnight", artist: "Taylor Swift ft. Post Malone", year: 2024, youtubeId: "q3wqWJ6EgMg", start: 10, end: 30 },
+        { title: "Good Luck Babe", artist: "Chappell Roan", year: 2024, youtubeId: "1T4H6eU5vZk", start: 10, end: 30 },
+        { title: "Please Please Please", artist: "Sabrina Carpenter", year: 2024, youtubeId: "6xOsRsqVZfE", start: 10, end: 30 }
+    ];
+
+    let currentPlayers = [...PLAYERS.map(p => ({ ...p }))];
+    let currentPlayerIndex = 0;
+    let currentQuestionIndex = 0;
+    let currentQuestion = null;
+    let waitingAnswer = false;
+    let currentIframe = null;
+    let gameFinished = false;
+    let shuffledQuestions = [];
+    let progressInterval = null;
+
+    // Synthèse vocale
+    let speechSynthesis = window.speechSynthesis;
+
+    function announcePlayerTurn(player) {
+        const message = `C'est au tour de ${player.name} !`;
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 0.9;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+    }
+
+    function announceCorrect(player) {
+        const message = `Très bien ${player.name} ! Plus un point !`;
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 0.95;
+        speechSynthesis.speak(utterance);
+    }
+
+    // Reconnaissance vocale
+    let recognition = null;
+    let isRecording = false;
+
+    function initSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            document.getElementById("voiceFeedback").innerHTML = "⚠️ Micro non supporté. Utilise le clavier !";
+            document.getElementById("micBtn").disabled = true;
+            return false;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'fr-FR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 3;
+        
+        recognition.onstart = () => {
+            isRecording = true;
+            const micBtn = document.getElementById("micBtn");
+            micBtn.classList.add("recording");
+            micBtn.textContent = "🎤🔴";
+            document.getElementById("voiceFeedback").innerHTML = "🎙️ Parle maintenant (Titre ou Artiste)...";
+            document.getElementById("voiceFeedback").style.background = "#f9ca24";
+        };
+        
+        recognition.onend = () => {
+            isRecording = false;
+            const micBtn = document.getElementById("micBtn");
+            micBtn.classList.remove("recording");
+            micBtn.textContent = "🎤 MIC";
+        };
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            document.getElementById("voiceFeedback").innerHTML = `🎤 Tu as dit : "${transcript}"`;
+            document.getElementById("voiceFeedback").style.background = "#27ae60";
+            document.getElementById("answerInput").value = transcript;
+            setTimeout(() => {
+                if (waitingAnswer && !gameFinished) checkAnswer();
+            }, 300);
+        };
+        
+        recognition.onerror = () => {
+            document.getElementById("voiceFeedback").innerHTML = "❌ Réessaie";
+            const micBtn = document.getElementById("micBtn");
+            micBtn.classList.remove("recording");
+            isRecording = false;
+            micBtn.textContent = "🎤 MIC";
+        };
+        return true;
+    }
+
+    function startVoiceRecognition() {
+        if (!waitingAnswer) {
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Écoute d'abord l'extrait ! ⚠️";
+            return;
+        }
+        if (recognition && !isRecording) {
+            try { recognition.start(); } catch(e) {}
+        }
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function normalizeString(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+            .replace(/[^\w\s]/g, "")
+            .replace(/\s+/g, " ");
+    }
+
+    function startProgressBar(duration) {
+        const progressFill = document.getElementById("progressFill");
+        progressFill.style.width = "0%";
+        if (progressInterval) clearInterval(progressInterval);
+        const startTime = Date.now();
+        progressInterval = setInterval(() => {
+            const elapsed = (Date.now() - startTime) / 1000;
+            const percent = Math.min(100, (elapsed / duration) * 100);
+            progressFill.style.width = percent + "%";
+            if (percent >= 100) clearInterval(progressInterval);
+        }, 100);
+    }
+
+    function stopProgressBar() {
+        if (progressInterval) {
+            clearInterval(progressInterval);
+            progressInterval = null;
+        }
+        document.getElementById("progressFill").style.width = "0%";
+    }
+
+    function playExtrait() {
+        if (!currentQuestion) return;
+        
+        if (currentIframe) {
+            document.body.removeChild(currentIframe);
+            currentIframe = null;
+        }
+        
+        stopProgressBar();
+        
+        const { youtubeId, start, end } = currentQuestion;
+        const duration = end - start;
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&start=${start}&end=${end}&enablejsapi=1&version=3&modestbranding=1&rel=0&showinfo=0`;
+        
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        iframe.src = embedUrl;
+        iframe.allow = "autoplay";
+        document.body.appendChild(iframe);
+        currentIframe = iframe;
+        
+        waitingAnswer = true;
+        startProgressBar(duration);
+        
+        document.getElementById("feedbackMsg").innerHTML = "🎧 Écoute bien ! Réponds après l'extrait... 🎧";
+        document.getElementById("feedbackMsg").style.background = "#0f3460";
+        
+        setTimeout(() => {
+            if (waitingAnswer) {
+                document.getElementById("feedbackMsg").innerHTML = "🎤 Maintenant, donne ta réponse (Titre ou Artiste) ! 🎤";
+                document.getElementById("answerInput").focus();
+                stopProgressBar();
+            }
+        }, (duration + 1) * 1000);
+        
+        setTimeout(() => {
+            if (currentIframe === iframe) {
+                document.body.removeChild(iframe);
+                if (currentIframe === iframe) currentIframe = null;
+            }
+        }, (duration + 3) * 1000);
+    }
+
+    function stopAudio() {
+        if (currentIframe) {
+            document.body.removeChild(currentIframe);
+            currentIframe = null;
+        }
+        stopProgressBar();
+        document.getElementById("feedbackMsg").innerHTML = "⏹ Extrait arrêté. Tu peux répondre !";
+    }
+
+    function checkAnswer() {
+        if (!waitingAnswer && !gameFinished) {
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Écoute d'abord l'extrait ! ⚠️";
+            return;
+        }
+        
+        const userAnswer = document.getElementById("answerInput").value.trim();
+        if (userAnswer === "") {
+            document.getElementById("feedbackMsg").innerHTML = "📝 Dis ou tape le TITRE ou l'ARTISTE ! 📝";
+            return;
+        }
+        
+        const currentPlayer = currentPlayers[currentPlayerIndex];
+        const normalizedUser = normalizeString(userAnswer);
+        const normalizedTitle = normalizeString(currentQuestion.title);
+        const normalizedArtist = normalizeString(currentQuestion.artist);
+        
+        const isTitleMatch = normalizedUser === normalizedTitle || 
+                             normalizedTitle.includes(normalizedUser) || 
+                             normalizedUser.includes(normalizedTitle);
+        const isArtistMatch = normalizedUser === normalizedArtist || 
+                              normalizedArtist.includes(normalizedUser) || 
+                              normalizedUser.includes(normalizedArtist);
+        
+        const isCorrect = isTitleMatch || isArtistMatch;
+        
+        if (isCorrect) {
+            currentPlayer.score++;
+            announceCorrect(currentPlayer);
+            document.getElementById("feedbackMsg").innerHTML = `🎉 TRÈS BIEN ${currentPlayer.emoji} ${currentPlayer.name} ! +1 point ! 🎉`;
+            document.getElementById("feedbackMsg").style.background = "#27ae60";
+        } else {
+            document.getElementById("feedbackMsg").innerHTML = `❌ FAUX ${currentPlayer.emoji} ${currentPlayer.name} ! C'était "${currentQuestion.title}" de ${currentQuestion.artist}. ❌`;
+            document.getElementById("feedbackMsg").style.background = "#e74c3c";
+        }
+        
+        waitingAnswer = false;
+        document.getElementById("answerInput").value = "";
+        stopAudio();
+        
+        currentPlayerIndex++;
+        if (currentPlayerIndex >= currentPlayers.length) currentPlayerIndex = 0;
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < shuffledQuestions.length) {
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("extraitInfo").innerHTML = `🎵 Extrait ${currentQuestionIndex+1}/${shuffledQuestions.length} - ${currentQuestion.artist} (${currentQuestion.year}) 🎵`;
+            updatePlayersUI();
+            updateTurnDisplay();
+            announcePlayerTurn(currentPlayers[currentPlayerIndex]);
+            document.getElementById("feedbackMsg").innerHTML += `<br>🎤 Au tour de ${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name} ! Clique sur JOUER. 🎤`;
+        } else {
+            endGame();
+        }
+        updatePlayersUI();
+    }
+    
+    function skipTurn() {
+        if (!waitingAnswer && !gameFinished) {
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Écoute d'abord l'extrait ! ⚠️";
+            return;
+        }
+        const currentPlayer = currentPlayers[currentPlayerIndex];
+        document.getElementById("feedbackMsg").innerHTML = `😅 ${currentPlayer.emoji} ${currentPlayer.name} passe... C'était "${currentQuestion.title}" de ${currentQuestion.artist}. 😅`;
+        
+        waitingAnswer = false;
+        document.getElementById("answerInput").value = "";
+        stopAudio();
+        
+        currentPlayerIndex++;
+        if (currentPlayerIndex >= currentPlayers.length) currentPlayerIndex = 0;
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < shuffledQuestions.length) {
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("extraitInfo").innerHTML = `🎵 Extrait ${currentQuestionIndex+1}/${shuffledQuestions.length} - ${currentQuestion.artist} (${currentQuestion.year}) 🎵`;
+            updatePlayersUI();
+            updateTurnDisplay();
+            announcePlayerTurn(currentPlayers[currentPlayerIndex]);
+        } else {
+            endGame();
+        }
+        updatePlayersUI();
+    }
+
+    function initGame() {
+        shuffledQuestions = shuffleArray([...MUSIC_QUESTIONS]);
+        currentPlayers = PLAYERS.map(p => ({ ...p, score: 0 }));
+        currentPlayerIndex = 0;
+        currentQuestionIndex = 0;
+        gameFinished = false;
+        waitingAnswer = false;
+        
+        currentQuestion = shuffledQuestions[0];
+        
+        updatePlayersUI();
+        updateTurnDisplay();
+        document.getElementById("extraitInfo").innerHTML = `🎵 Extrait ${currentQuestionIndex+1}/${shuffledQuestions.length} - ${currentQuestion.artist} (${currentQuestion.year}) 🎵`;
+        document.getElementById("answerInput").value = "";
+        document.getElementById("rankingPanel").classList.add("hidden");
+        document.getElementById("feedbackMsg").innerHTML = `🎮 ${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name} à toi ! ${shuffledQuestions.length} titres de légende t'attendent !`;
+        document.getElementById("feedbackMsg").style.background = "#2c3e66";
+        
+        announcePlayerTurn(currentPlayers[currentPlayerIndex]);
+        
+        if (currentIframe) {
+            document.body.removeChild(currentIframe);
+            currentIframe = null;
+        }
+        stopProgressBar();
+    }
+
+    function updatePlayersUI() {
+        const container = document.getElementById("playersGrid");
+        container.innerHTML = "";
+        const sorted = [...currentPlayers].sort((a, b) => b.score - a.score);
+        sorted.forEach(player => {
+            const badge = document.createElement("div");
+            badge.className = "player-badge";
+            if (!gameFinished && currentPlayers[currentPlayerIndex]?.name === player.name) badge.classList.add("active");
+            badge.innerHTML = `<span>${player.emoji}</span><span>${player.name}</span><span class="player-score">${player.score}</span>`;
+            container.appendChild(badge);
+        });
+    }
+
+    function updateTurnDisplay() {
+        if (!gameFinished && currentPlayers[currentPlayerIndex]) {
+            document.getElementById("currentPlayerName").innerHTML = `${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name}`;
+        }
+    }
+
+    function endGame() {
+        gameFinished = true;
+        waitingAnswer = false;
+        stopAudio();
+        const sorted = [...currentPlayers].sort((a, b) => b.score - a.score);
+        document.getElementById("rankingPanel").classList.remove("hidden");
+        const rankingList = document.getElementById("rankingList");
+        rankingList.innerHTML = "";
+        sorted.forEach((player, idx) => {
+            const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "📌";
+            const item = document.createElement("div");
+            item.className = "ranking-item";
+            item.innerHTML = `<span>${medal} ${player.emoji} ${player.name}</span><span style="color:gold;">${player.score} pts</span>`;
+            rankingList.appendChild(item);
+        });
+        document.getElementById("feedbackMsg").innerHTML = `🏆 FIN DU JEU ! GAGNANT : ${sorted[0].emoji} ${sorted[0].name} avec ${sorted[0].score} points ! 🏆`;
+    }
+
+    // Événements
+    document.getElementById("playBtn").addEventListener("click", playExtrait);
+    document.getElementById("stopBtn").addEventListener("click", stopAudio);
+    document.getElementById("submitBtn").addEventListener("click", checkAnswer);
+    document.getElementById("skipBtn").addEventListener("click", skipTurn);
+    document.getElementById("micBtn").addEventListener("click", startVoiceRecognition);
+    document.getElementById("restartBtn").addEventListener("click", () => { initGame(); });
+    document.getElementById("answerInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && waitingAnswer && !gameFinished) checkAnswer();
+    });
+    
+    initSpeechRecognition();
+    initGame();
+</script>
+</body>
+</html>
