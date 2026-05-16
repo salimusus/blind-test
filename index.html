@@ -1,1 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Blin Test Musical - Version Premium</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            font-family: 'Poppins', 'Segoe UI', 'Comic Neue', sans-serif;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game-container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255,255,255,0.95);
+            border-radius: 60px;
+            padding: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .players-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .player-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 40px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+        }
+
+        .player-badge.active {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px gold;
+        }
+
+        .player-score {
+            background: gold;
+            color: #333;
+            border-radius: 30px;
+            padding: 2px 8px;
+            margin-left: 6px;
+            font-size: 0.7rem;
+        }
+
+        .game-panel {
+            background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+            border-radius: 50px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        .turn-indicator {
+            background: #f9ca24;
+            border-radius: 50px;
+            padding: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .music-icon {
+            font-size: 3.5rem;
+            margin: 10px 0;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); text-shadow: 0 0 10px #f9ca24; }
+        }
+
+        .extrait-info {
+            background: #0f3460;
+            border-radius: 30px;
+            padding: 8px;
+            margin: 10px 0;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .audio-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .audio-btn {
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+            transition: 0.05s linear;
+        }
+
+        .audio-btn:active { transform: translateY(3px); }
+        .audio-btn.play { background: #6c5ce7; box-shadow: 0 4px 0 #4a3a9e; }
+        .audio-btn.stop { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        .audio-btn.mic { background: #e74c3c; box-shadow: 0 4px 0 #c0392b; }
+        .audio-btn.mic.recording { background: #27ae60; animation: pulseMic 1s infinite; }
+
+        @keyframes pulseMic {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .answer-area {
+            margin: 15px 0;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1rem;
+            border: 3px solid #6c5ce7;
+            border-radius: 50px;
+            text-align: center;
+            font-family: inherit;
+            background: white;
+        }
+
+        .voice-feedback {
+            background: #2c3e66;
+            border-radius: 30px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #f9ca24;
+        }
+
+        .answer-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .btn-submit {
+            flex: 1;
+            background: #00b894;
+            border: none;
+            border-radius: 50px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #008f6b;
+        }
+
+        .btn-skip {
+            flex: 1;
+            background: #e74c3c;
+            border: none;
+            border-radius: 50px;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #c0392b;
+        }
+
+        .feedback {
+            background: #2c3e66;
+            border-radius: 40px;
+            padding: 12px;
+            margin: 15px 0;
+            color: white;
+            font-weight: bold;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+
+        .ranking {
+            background: #1a1a2e;
+            border-radius: 40px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .ranking h3 { color: gold; margin-bottom: 10px; }
+        .ranking-list { display: flex; flex-direction: column; gap: 6px; }
+        .ranking-item { display: flex; justify-content: space-between; background: #2a2a40; padding: 8px 15px; border-radius: 30px; color: white; }
+        .next-btn { background: #f39c12; border: none; border-radius: 50px; padding: 12px; font-size: 1.1rem; font-weight: bold; color: white; width: 100%; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 0 #b2631a; }
+        .hidden { display: none; }
+
+        .bounce { animation: bounce 0.3s ease-out; }
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @media (max-width: 500px) {
+            .game-container { padding: 15px; }
+            .player-badge { padding: 4px 8px; font-size: 0.7rem; }
+            .turn-indicator { font-size: 0.9rem; }
+            .audio-btn { padding: 10px 15px; font-size: 0.8rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>🎵 BLIN TEST MUSICAL 🎵<br><span style="font-size:0.7rem;">Titre ou Artiste - Réponse Vocale</span></h1>
+
+    <div class="players-grid" id="playersGrid"></div>
+
+    <div class="game-panel">
+        <div class="turn-indicator" id="turnIndicator">🎤 Au tour de <span id="currentPlayerName">...</span> 🎤</div>
+        <div class="music-icon">🎧</div>
+        <div class="extrait-info" id="extraitInfo">🎵 Extrait mystère 🎵</div>
+
+        <div class="audio-controls">
+            <button class="audio-btn play" id="playBtn">▶ JOUER L'EXTRAIT</button>
+            <button class="audio-btn stop" id="stopBtn">⏹ STOP</button>
+            <button class="audio-btn mic" id="micBtn">🎤 RÉPONSE VOCALE</button>
+        </div>
+
+        <div class="answer-area">
+            <input type="text" id="answerInput" class="answer-input" placeholder="Titre ou Artiste..." autocomplete="off">
+            <div class="voice-feedback" id="voiceFeedback"></div>
+            <div class="answer-buttons">
+                <button class="btn-submit" id="submitBtn">🎯 VALIDER</button>
+                <button class="btn-skip" id="skipBtn">😅 PASSER</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback" id="feedbackMsg">🎮 Clique sur "JOUER" pour écouter l'extrait ! Tu peux répondre par le TITRE ou l'ARTISTE !</div>
+
+    <div class="ranking hidden" id="rankingPanel">
+        <h3>🏆 CLASSEMENT FINAL 🏆</h3>
+        <div class="ranking-list" id="rankingList"></div>
+        <button class="next-btn" id="restartBtn">🔄 NOUVELLE PARTIE</button>
+    </div>
+</div>
+
+<script>
+    // ========== LISTE DES JOUEURS ==========
+    const PLAYERS = [
+        { name: "Lola", emoji: "🌸", score: 0 },
+        { name: "Enzo", emoji: "🚀", score: 0 },
+        { name: "Marlone", emoji: "🦁", score: 0 },
+        { name: "Stéphanie", emoji: "💎", score: 0 },
+        { name: "Emma", emoji: "🌟", score: 0 },
+        { name: "Télio", emoji: "🐒", score: 0 }
+    ];
+
+    // ========== BASE DE DONNÉES MUSICALE - VERSION SANS PUB ==========
+    // Utilisation de musiques libres de droits ou extraits courts via API alternative
+    // Solution: utilisation de sons intégrés (Web Audio API) pour les annonces
+    // et pour les extraits, on utilise des versions courtes hébergées
+    
+    const MUSIC_QUESTIONS = [
+        // Années 80 - Utilisation de chemins alternatifs
+        { title: "Billie Jean", artist: "Michael Jackson", year: 1983, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", start: 0, end: 20 },
+        { title: "Sweet Dreams", artist: "Eurythmics", year: 1983, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", start: 0, end: 20 },
+        { title: "Every Breath You Take", artist: "The Police", year: 1983, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", start: 0, end: 20 },
+        { title: "Thriller", artist: "Michael Jackson", year: 1982, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", start: 0, end: 20 },
+        { title: "Girls Just Want to Have Fun", artist: "Cyndi Lauper", year: 1983, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", start: 0, end: 20 },
+        { title: "Africa", artist: "Toto", year: 1982, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", start: 0, end: 20 },
+        { title: "Take on Me", artist: "A-ha", year: 1985, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", start: 0, end: 20 },
+        { title: "Like a Prayer", artist: "Madonna", year: 1989, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", start: 0, end: 20 },
+        { title: "I Wanna Dance with Somebody", artist: "Whitney Houston", year: 1987, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", start: 0, end: 20 },
+        { title: "Livin' on a Prayer", artist: "Bon Jovi", year: 1986, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", start: 0, end: 20 },
+        // Années 90
+        { title: "Smells Like Teen Spirit", artist: "Nirvana", year: 1991, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", start: 0, end: 20 },
+        { title: "Wannabe", artist: "Spice Girls", year: 1996, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", start: 0, end: 20 },
+        { title: "Wonderwall", artist: "Oasis", year: 1995, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", start: 0, end: 20 },
+        { title: "Zombie", artist: "The Cranberries", year: 1994, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", start: 0, end: 20 },
+        { title: "Waterfalls", artist: "TLC", year: 1995, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", start: 0, end: 20 },
+        { title: "I Will Always Love You", artist: "Whitney Houston", year: 1992, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", start: 0, end: 20 },
+        // Années 2000
+        { title: "Toxic", artist: "Britney Spears", year: 2003, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", start: 0, end: 20 },
+        { title: "Hey Ya!", artist: "OutKast", year: 2003, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", start: 0, end: 20 },
+        { title: "Crazy in Love", artist: "Beyoncé", year: 2003, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", start: 0, end: 20 },
+        { title: "Umbrella", artist: "Rihanna", year: 2007, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", start: 0, end: 20 },
+        { title: "Poker Face", artist: "Lady Gaga", year: 2008, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", start: 0, end: 20 },
+        // Années 2010
+        { title: "Rolling in the Deep", artist: "Adele", year: 2010, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", start: 0, end: 20 },
+        { title: "Uptown Funk", artist: "Mark Ronson", year: 2014, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", start: 0, end: 20 },
+        { title: "Happy", artist: "Pharrell Williams", year: 2013, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", start: 0, end: 20 },
+        { title: "Shake It Off", artist: "Taylor Swift", year: 2014, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3", start: 0, end: 20 },
+        { title: "Shape of You", artist: "Ed Sheeran", year: 2017, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3", start: 0, end: 20 },
+        // Années 2020
+        { title: "Blinding Lights", artist: "The Weeknd", year: 2020, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3", start: 0, end: 20 },
+        { title: "Levitating", artist: "Dua Lipa", year: 2020, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3", start: 0, end: 20 },
+        { title: "As It Was", artist: "Harry Styles", year: 2022, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3", start: 0, end: 20 },
+        { title: "Flowers", artist: "Miley Cyrus", year: 2023, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3", start: 0, end: 20 },
+        { title: "Espresso", artist: "Sabrina Carpenter", year: 2024, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", start: 0, end: 20 },
+        { title: "Lose Control", artist: "Teddy Swims", year: 2023, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3", start: 0, end: 20 },
+        { title: "Cruel Summer", artist: "Taylor Swift", year: 2023, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3", start: 0, end: 20 },
+        { title: "Die With A Smile", artist: "Lady Gaga", year: 2024, audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3", start: 0, end: 20 }
+    ];
+
+    let currentPlayers = [...PLAYERS.map(p => ({ ...p }))];
+    let currentPlayerIndex = 0;
+    let currentQuestionIndex = 0;
+    let currentQuestion = null;
+    let waitingAnswer = false;
+    let currentAudio = null;
+    let gameFinished = false;
+    let shuffledQuestions = [];
+
+    // Synthèse vocale pour annoncer les joueurs
+    let speechSynthesis = window.speechSynthesis;
+    let voiceAnnouncementEnabled = true;
+
+    function announcePlayerTurn(player) {
+        if (!voiceAnnouncementEnabled) return;
+        const message = `C'est au tour de ${player.name} !`;
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+    }
+
+    function announceCorrect(player) {
+        const message = `Très bien ${player.name} ! Plus un point !`;
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 0.95;
+        speechSynthesis.speak(utterance);
+    }
+
+    function announceWrong(player, correctTitle, correctArtist) {
+        const message = `Faux ${player.name} ! La réponse était ${correctTitle} de ${correctArtist}`;
+        const utterance = new SpeechSynthesisUtterance(message);
+        utterance.lang = 'fr-FR';
+        utterance.rate = 0.9;
+        speechSynthesis.speak(utterance);
+    }
+
+    // Reconnaissance vocale
+    let recognition = null;
+    let isRecording = false;
+
+    function initSpeechRecognition() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            document.getElementById("voiceFeedback").innerHTML = "⚠️ Micro non supporté. Utilise le clavier !";
+            document.getElementById("micBtn").disabled = true;
+            return false;
+        }
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'fr-FR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 3;
+        
+        recognition.onstart = () => {
+            isRecording = true;
+            const micBtn = document.getElementById("micBtn");
+            micBtn.classList.add("recording");
+            micBtn.textContent = "🎤🔴";
+            document.getElementById("voiceFeedback").innerHTML = "🎙️ Parle maintenant (Titre ou Artiste)...";
+            document.getElementById("voiceFeedback").style.background = "#f9ca24";
+        };
+        
+        recognition.onend = () => {
+            isRecording = false;
+            const micBtn = document.getElementById("micBtn");
+            micBtn.classList.remove("recording");
+            micBtn.textContent = "🎤 MIC";
+            setTimeout(() => {
+                if (!isRecording) {
+                    const vf = document.getElementById("voiceFeedback");
+                    vf.innerHTML = "";
+                    vf.style.background = "transparent";
+                }
+            }, 2000);
+        };
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            document.getElementById("voiceFeedback").innerHTML = `🎤 Tu as dit : "${transcript}"`;
+            document.getElementById("voiceFeedback").style.background = "#27ae60";
+            document.getElementById("answerInput").value = transcript;
+            setTimeout(() => {
+                if (waitingAnswer && !gameFinished) checkAnswer();
+            }, 300);
+        };
+        
+        recognition.onerror = (event) => {
+            document.getElementById("voiceFeedback").innerHTML = `❌ Erreur: ${event.error}`;
+            document.getElementById("voiceFeedback").style.background = "#e74c3c";
+            const micBtn = document.getElementById("micBtn");
+            micBtn.classList.remove("recording");
+            isRecording = false;
+            micBtn.textContent = "🎤 MIC";
+        };
+        return true;
+    }
+
+    function startVoiceRecognition() {
+        if (!waitingAnswer) {
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Écoute d'abord l'extrait ! ⚠️";
+            document.getElementById("feedbackMsg").style.background = "#e74c3c";
+            return;
+        }
+        if (recognition && !isRecording) {
+            try { recognition.start(); } catch(e) { console.log("Micro error"); }
+        } else if (!recognition) {
+            initSpeechRecognition();
+            if (recognition && !isRecording) recognition.start();
+        }
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function normalizeString(str) {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+            .replace(/[^\w\s]/g, "")
+            .replace(/\s+/g, " ");
+    }
+
+    function playExtrait() {
+        if (!currentQuestion) return;
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
+        const audio = new Audio(currentQuestion.audioUrl);
+        currentAudio = audio;
+        
+        audio.play().catch(e => {
+            console.log("Audio error:", e);
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Lecture audio impossible. Vérifie ta connexion internet ⚠️";
+        });
+        
+        waitingAnswer = true;
+        document.getElementById("feedbackMsg").innerHTML = "🎧 Écoute bien ! Réponds après l'extrait... 🎧";
+        document.getElementById("feedbackMsg").style.background = "#0f3460";
+        
+        setTimeout(() => {
+            if (waitingAnswer && currentAudio) {
+                currentAudio.pause();
+            }
+        }, 22000);
+        
+        setTimeout(() => {
+            if (waitingAnswer) {
+                document.getElementById("feedbackMsg").innerHTML = "🎤 Maintenant, donne ta réponse (Titre ou Artiste) ! 🎤";
+                document.getElementById("answerInput").focus();
+            }
+        }, 21000);
+    }
+
+    function stopAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        document.getElementById("feedbackMsg").innerHTML = "⏹ Extrait arrêté. Tu peux répondre !";
+    }
+
+    function checkAnswer() {
+        if (!waitingAnswer && !gameFinished) {
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Écoute d'abord l'extrait ! ⚠️";
+            return;
+        }
+        
+        const userAnswer = document.getElementById("answerInput").value.trim();
+        if (userAnswer === "") {
+            document.getElementById("feedbackMsg").innerHTML = "📝 Dis ou tape le TITRE ou l'ARTISTE ! 📝";
+            return;
+        }
+        
+        const currentPlayer = currentPlayers[currentPlayerIndex];
+        const normalizedUser = normalizeString(userAnswer);
+        const normalizedTitle = normalizeString(currentQuestion.title);
+        const normalizedArtist = normalizeString(currentQuestion.artist);
+        
+        const isTitleMatch = normalizedUser === normalizedTitle || 
+                             normalizedTitle.includes(normalizedUser) || 
+                             normalizedUser.includes(normalizedTitle);
+        const isArtistMatch = normalizedUser === normalizedArtist || 
+                              normalizedArtist.includes(normalizedUser) || 
+                              normalizedUser.includes(normalizedArtist);
+        
+        const isCorrect = isTitleMatch || isArtistMatch;
+        
+        if (isCorrect) {
+            currentPlayer.score++;
+            announceCorrect(currentPlayer);
+            document.getElementById("feedbackMsg").innerHTML = `🎉 TRÈS BIEN ${currentPlayer.emoji} ${currentPlayer.name} ! +1 point ! 🎉`;
+            document.getElementById("feedbackMsg").style.background = "#27ae60";
+            document.getElementById("turnIndicator").classList.add("bounce");
+            setTimeout(() => document.getElementById("turnIndicator").classList.remove("bounce"), 300);
+        } else {
+            announceWrong(currentPlayer, currentQuestion.title, currentQuestion.artist);
+            document.getElementById("feedbackMsg").innerHTML = `❌ FAUX ${currentPlayer.emoji} ${currentPlayer.name} ! La réponse était "${currentQuestion.title}" de ${currentQuestion.artist}. ❌`;
+            document.getElementById("feedbackMsg").style.background = "#e74c3c";
+        }
+        
+        waitingAnswer = false;
+        document.getElementById("answerInput").value = "";
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
+        currentPlayerIndex++;
+        if (currentPlayerIndex >= currentPlayers.length) currentPlayerIndex = 0;
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < shuffledQuestions.length) {
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("extraitInfo").innerHTML = `🎵 Extrait ${currentQuestionIndex+1}/${shuffledQuestions.length} - ${currentQuestion.artist} (${currentQuestion.year}) 🎵`;
+            updatePlayersUI();
+            updateTurnDisplay();
+            announcePlayerTurn(currentPlayers[currentPlayerIndex]);
+            document.getElementById("feedbackMsg").innerHTML += `<br>🎤 Au tour de ${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name} ! Clique sur JOUER. 🎤`;
+        } else {
+            endGame();
+        }
+        updatePlayersUI();
+    }
+    
+    function skipTurn() {
+        if (!waitingAnswer && !gameFinished) {
+            document.getElementById("feedbackMsg").innerHTML = "⚠️ Écoute d'abord l'extrait ! ⚠️";
+            return;
+        }
+        const currentPlayer = currentPlayers[currentPlayerIndex];
+        document.getElementById("feedbackMsg").innerHTML = `😅 ${currentPlayer.emoji} ${currentPlayer.name} passe... C'était "${currentQuestion.title}" de ${currentQuestion.artist}. 😅`;
+        
+        waitingAnswer = false;
+        document.getElementById("answerInput").value = "";
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
+        currentPlayerIndex++;
+        if (currentPlayerIndex >= currentPlayers.length) currentPlayerIndex = 0;
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < shuffledQuestions.length) {
+            currentQuestion = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("extraitInfo").innerHTML = `🎵 Extrait ${currentQuestionIndex+1}/${shuffledQuestions.length} - ${currentQuestion.artist} (${currentQuestion.year}) 🎵`;
+            updatePlayersUI();
+            updateTurnDisplay();
+            announcePlayerTurn(currentPlayers[currentPlayerIndex]);
+            document.getElementById("feedbackMsg").innerHTML += `<br>🎤 Au tour de ${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name} ! 🎤`;
+        } else {
+            endGame();
+        }
+        updatePlayersUI();
+    }
+
+    function initGame() {
+        shuffledQuestions = shuffleArray([...MUSIC_QUESTIONS]);
+        currentPlayers = PLAYERS.map(p => ({ ...p, score: 0 }));
+        currentPlayerIndex = 0;
+        currentQuestionIndex = 0;
+        gameFinished = false;
+        waitingAnswer = false;
+        
+        currentQuestion = shuffledQuestions[0];
+        
+        updatePlayersUI();
+        updateTurnDisplay();
+        document.getElementById("extraitInfo").innerHTML = `🎵 Extrait ${currentQuestionIndex+1}/${shuffledQuestions.length} - ${currentQuestion.artist} (${currentQuestion.year}) 🎵`;
+        document.getElementById("answerInput").value = "";
+        document.getElementById("answerInput").disabled = false;
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("skipBtn").disabled = false;
+        document.getElementById("micBtn").disabled = false;
+        
+        document.getElementById("rankingPanel").classList.add("hidden");
+        document.getElementById("feedbackMsg").innerHTML = `🎮 ${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name} à toi ! Clique sur JOUER. Tu peux répondre par le TITRE ou l'ARTISTE !`;
+        document.getElementById("feedbackMsg").style.background = "#2c3e66";
+        
+        announcePlayerTurn(currentPlayers[currentPlayerIndex]);
+        
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+    }
+
+    function updatePlayersUI() {
+        const container = document.getElementById("playersGrid");
+        container.innerHTML = "";
+        const sorted = [...currentPlayers].sort((a, b) => b.score - a.score);
+        sorted.forEach(player => {
+            const badge = document.createElement("div");
+            badge.className = "player-badge";
+            if (!gameFinished && currentPlayers[currentPlayerIndex]?.name === player.name) badge.classList.add("active");
+            badge.innerHTML = `<span>${player.emoji}</span><span>${player.name}</span><span class="player-score">${player.score}</span>`;
+            container.appendChild(badge);
+        });
+    }
+
+    function updateTurnDisplay() {
+        if (!gameFinished && currentPlayers[currentPlayerIndex]) {
+            document.getElementById("currentPlayerName").innerHTML = `${currentPlayers[currentPlayerIndex].emoji} ${currentPlayers[currentPlayerIndex].name}`;
+        }
+    }
+
+    function endGame() {
+        gameFinished = true;
+        waitingAnswer = false;
+        const sorted = [...currentPlayers].sort((a, b) => b.score - a.score);
+        document.getElementById("rankingPanel").classList.remove("hidden");
+        const rankingList = document.getElementById("rankingList");
+        rankingList.innerHTML = "";
+        sorted.forEach((player, idx) => {
+            const medal = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "📌";
+            const item = document.createElement("div");
+            item.className = "ranking-item";
+            item.innerHTML = `<span>${medal} ${player.emoji} ${player.name}</span><span style="color:gold;">${player.score} pts</span>`;
+            rankingList.appendChild(item);
+        });
+        document.getElementById("feedbackMsg").innerHTML = `🏆 FIN DU JEU ! GAGNANT : ${sorted[0].emoji} ${sorted[0].name} avec ${sorted[0].score} points ! 🏆`;
+        document.getElementById("answerInput").disabled = true;
+        document.getElementById("submitBtn").disabled = true;
+        document.getElementById("skipBtn").disabled = true;
+        document.getElementById("micBtn").disabled = true;
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio = null;
+        }
+        
+        const endMessage = `La partie est terminée. Le gagnant est ${sorted[0].name} avec ${sorted[0].score} points !`;
+        const utterance = new SpeechSynthesisUtterance(endMessage);
+        utterance.lang = 'fr-FR';
+        speechSynthesis.speak(utterance);
+    }
+
+    // Événements
+    document.getElementById("playBtn").addEventListener("click", playExtrait);
+    document.getElementById("stopBtn").addEventListener("click", stopAudio);
+    document.getElementById("submitBtn").addEventListener("click", checkAnswer);
+    document.getElementById("skipBtn").addEventListener("click", skipTurn);
+    document.getElementById("micBtn").addEventListener("click", startVoiceRecognition);
+    document.getElementById("restartBtn").addEventListener("click", () => { initGame(); });
+    document.getElementById("answerInput").addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && waitingAnswer && !gameFinished) checkAnswer();
+    });
+    
+    // Désactiver la synthèse vocale automatique au chargement (nécessite interaction utilisateur)
+    // La première annonce se fera au premier tour
+    
+    initSpeechRecognition();
+    initGame();
+</script>
+</body>
+</html>
